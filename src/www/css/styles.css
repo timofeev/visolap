@@ -1,0 +1,25 @@
+#page {
+    padding-top: 60px;
+    position: relative;
+}
+
+.window {
+	width: 300px;
+	height: 300px;
+	float: left;
+	border: 1px solid grey;
+	box-shadow: 0 0 2px 0px #000;
+	margin: 0 50px 50px 0;
+	border-radius: 4px;
+	padding:5px;
+	overflow: auto;
+}
+
+.window form {
+	margin: 0;
+}
+
+.window form textarea {
+	width: 286px !important;
+	height: 225px !important;
+}
