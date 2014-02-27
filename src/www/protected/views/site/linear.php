@@ -19,7 +19,7 @@
 		</select>
 	</div>
 	<div class="form-group">
-		<label>Аггрегация</label>
+		<label>Агрегация</label>
 		<select name="aggregation">
 			<option value="sum">Sum</option>
 			<option value="count">Count</option>
