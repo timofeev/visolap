@@ -89,6 +89,8 @@
 			var y = params['y'];
 			var x_type = params['x_type'];
 			var y_type = params['y_type'];
+			var aggregate = params['aggregation'];
+			
 			if (x_type == 'date') {
 				currentData.forEach(function(d) {
 					if (typeof d[x] != 'object') {
@@ -105,7 +107,19 @@
 				}
         		return parseInt(d[x])
         	});
-			var hits = dimension.group().reduceSum(function(d) {return d[y]}); 
+        	var hits = dimension.group();
+        	switch (aggregate) {
+				case 'sum' :
+					hits = hits.reduceSum(function(d) {return d[y]});
+					break
+				case 'count' :
+					hits = hits.reduceCount();
+					break
+				default :
+					hits = hits.reduceSum(function(d) {return d[y]});
+					break
+        	}
+        	
 			var min = dimension.bottom(1)[0][x];	        
 			var max = dimension.top(1)[0][x];
 			

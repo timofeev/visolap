@@ -9,7 +9,7 @@
     <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/jquery.form.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/d3.js'); ?>
-    <?php Yii::app()->clientScript->registerScriptFile('/js/crossFilter.js'); ?>    
+    <?php Yii::app()->clientScript->registerScriptFile('/js/crossfilter.js'); ?>    
     <?php Yii::app()->clientScript->registerScriptFile('/js/dc.js'); ?>    
     <?php Yii::app()->clientScript->registerScriptFile('/js/core.js'); ?>
 
