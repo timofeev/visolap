@@ -9,8 +9,10 @@
 						<textarea class="form-control" name="source"></textarea>
 					</div>
 					<button type="submit" class="btn">Отправить</button>		
-				</form>
+				</form>				
 			</div>
+		</div>
+		<div class="source-data">
 		</div>
 	</div>
 </div>

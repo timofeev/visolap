@@ -40,13 +40,14 @@
 		currentData = data;
 		cleanErrors();
 		var table = createTable(currentData);
-		if ($('#data').length == 0) {
+		/*if ($('#data').length == 0) {
 			var window = createWindow(table, 'data');
 			windows.append(window);
 		} else {
 			var window = $('#data');
 			window.html(table);
-		}
+		}*/
+		$('#source').putWindowData(table);
 		dataLoadedEvent();		
 		//---//
 		ndx = crossfilter(currentData);		
@@ -62,6 +63,22 @@
         .radius(80) // define pie radius
         .dimension(gainOrLoss) // set dimension
         .group(gainOrLossGroup).renderLabel(true).render(); // set group   */ 	
+	}
+	
+	$.fn.putWindowData = function(data) {
+		var content = this.find('.content');
+		var source = this.find('.source-data');
+		source.html('');
+		source.prepend(content.children());
+		content.html(data);
+		content.prepend(getEdit());
+	}
+	
+	$.fn.editSourceData = function() {
+		var content = this.find('.content');
+		var source = this.find('.source-data');
+		content.html('');
+		content.prepend(source.children());
 	}
 	
 	var parseDate = d3.time.format("%m/%d/%Y").parse;
@@ -86,7 +103,7 @@
 		window.find('input, select').each(function(){			
 			params[$(this).attr('name')] = $(this).attr('value');
 		});
-		window.html('');
+		window.closest('.window').putWindowData('');
 		if (params['type'] == 'linear') {
 			var x = params['x'];
 			var y = params['y'];
@@ -121,22 +138,44 @@
 				default :
 					hits = hits.reduceSum(function(d) {return d[y]});
 					break
+        	}      	
+        	
+			var minX = dimension.bottom(1)[0][x];	        
+			var maxX = dimension.top(1)[0][x];
+			
+			var xDomain = d3.scale.linear().domain([minX, maxX]);
+			if (x_type == 'date') {
+				xDomain = d3.time.scale().domain([minX,maxX]);
+			}
+			
+			var hitsArr = hits.all();
+        	var minY = hitsArr[0].value;        	
+        	var maxY = hitsArr[hitsArr.length-1].value;
+        	
+        	if (y_type == 'numeric') {
+        		if (minY < 0) {
+					minY = minY * 1.05
+        		} else {
+					minY = minY * 0.95;
+				}
+				if (maxY < 0) {
+					maxY = maxY * 0.95;
+				} else {
+					maxY = maxY * 1.05;
+				}
         	}
         	
-			var min = dimension.bottom(1)[0][x];	        
-			var max = dimension.top(1)[0][x];
+        	var yDomain = d3.scale.linear().domain([minY, maxY]);
+			if (y_type == 'date') {
+				yDomain = d3.time.scale().domain([minY,maxY]);
+			}        	
 			
-			var domain = d3.scale.linear().domain([min, max]);
-			if (x_type == 'date') {
-				domain = d3.time.scale().domain([min,max]);
-			}
 	        var hitslineChart  = dc.lineChart('#'+window.attr('id')); 
 	        hitslineChart
 			.width(500).height(200)
 			.dimension(dimension)
 			.group(hits)
-			.x(domain).render();
-					
+			.x(xDomain).y(yDomain).render();
 		}
 	}
 	
@@ -146,7 +185,7 @@
 		} else {
 			classes = 'window';
 		}
-		var window = $('<div class="'+classes+'"><div class="resize"><div class="content"></div></div></div>');
+		var window = $('<div class="'+classes+'"><div class="resize"><div class="content"></div></div><div class="source-data"></div></div>');
 		window.find('.resize').resizable({
 			minWidth: 300,
 			minHeight: 300
@@ -191,7 +230,15 @@
 	var events = function() {
 		$('#addButton li').click(function(){
 			createNewGraph($(this).data('type'));
-		});		
+		});
+	}
+	
+	var getEdit = function() {
+		var edit = $('<a href="javascript:void(0);" class="edit">Редактировать</a>');
+		edit.click(function(){
+			$(this).closest('.window').editSourceData();
+		});
+		return edit;
 	}
 	
 	$(document).ready(function(){
