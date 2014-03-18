@@ -7,6 +7,8 @@
     <link rel="stylesheet" type="text/css" href="/css/styles.css" />
     <link rel="stylesheet" type="text/css" href="/css/dc.css" />
     <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.ui/js/jquery-ui-1.10.4.custom.min.js'); ?>
+    <?php Yii::app()->clientScript->registerCssFile('/js/lib/jquery.ui/css/ui-lightness/jquery-ui-1.10.4.custom.min.css'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/jquery.form.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/d3.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/crossfilter.js'); ?>    

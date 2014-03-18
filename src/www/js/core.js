@@ -6,8 +6,11 @@
 	var ndx;
 	var all;
 	
-	var init = function() {
+	var init = function() {		
 		windows = $('.windows');
+		windows.sortable({
+			cancel : '.content'
+		});
 		alerts = $('.alerts');
 		$('#source form').ajaxForm({
 			dataType: 'json',
@@ -71,7 +74,7 @@
 				gWindowIds++;
 				var window = createWindow(data, 'graph'+gWindowIds, 'graph');
 				window.find('.new-graph button').click(function(){
-					processGraph($(this).closest('.window'));
+					processGraph($(this).closest('.content'));
 				});
 				windows.append(window);
 			}
@@ -143,11 +146,15 @@
 		} else {
 			classes = 'window';
 		}
-		var window = $('<div class="'+classes+'"></div>');
+		var window = $('<div class="'+classes+'"><div class="resize"><div class="content"></div></div></div>');
+		window.find('.resize').resizable({
+			minWidth: 300,
+			minHeight: 300
+		});
 		if (id !== undefined) {
-			window.attr('id', id);
+			window.find('.content').attr('id', id);
 		}
-		window.html(content);
+		window.find('.content').html(content);
 		return window;
 	}
 	
@@ -190,5 +197,9 @@
 	$(document).ready(function(){
 		init();
 		events();
+		$('.window .resize').resizable({
+			minWidth: 300,
+			minHeight: 300
+		});		
 	});
 })(jQuery);
