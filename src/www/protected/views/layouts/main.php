@@ -9,6 +9,9 @@
     <?php Yii::app()->clientScript->registerCoreScript('jquery'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.ui/js/jquery-ui-1.10.4.custom.min.js'); ?>
     <?php Yii::app()->clientScript->registerCssFile('/js/lib/jquery.ui/css/ui-lightness/jquery-ui-1.10.4.custom.min.css'); ?>
+    <?php Yii::app()->clientScript->registerCssFile('/js/lib/jquery.contextMenu/jquery.contextMenu.css'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.contextMenu/jquery.ui.position.js'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.contextMenu/jquery.contextMenu.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/jquery.form.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/d3.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/crossfilter.js'); ?>    
@@ -27,11 +30,9 @@
 	            'items'=>array(
 	                array('label'=>'Главная', 'url'=>'/'),
 	                array(
-	                	'label'=>'Добавить график',	                	
-	                	'itemOptions' => array('id' => 'addButton', 'style' => 'display: none;'),
-	                	'items' => array(
-	                		array('label'=>'Линейный', 'url'=>'javascript:void(0);', 'itemOptions' => array('data-type' => 'linear')),
-	                	)
+	                	'label' => 'Добавить данные',
+	                	'url' => 'javascript:void(0);',
+	                	'itemOptions' => array('id' => 'addDataButton', 'data-url' => Yii::app()->createUrl('data/form'))	                	
 	                ),
 	            ),
 	        ),

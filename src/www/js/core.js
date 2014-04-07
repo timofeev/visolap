@@ -1,10 +1,6 @@
 (function($){
 	var windows;
-	var gWindowIds = 0;
 	var alerts;
-	var currentData;
-	var ndx;
-	var all;
 	
 	var init = function() {		
 		windows = $('.windows');
@@ -12,45 +8,27 @@
 			cancel : '.content'
 		});
 		alerts = $('.alerts');
-		$('#source form').ajaxForm({
-			dataType: 'json',
-			success: function(data){				
-				if (data['error'] !== undefined) {
-					error(data['error']);					
-				} else {
-					processData(data);
-				}
-			}
-		});		
 	}
 	var error = function(message) {		
 		var alert = $('<div class="alert alert-danger">'+message+'</div>');		
 		alerts.html(alert);
+		setTimeout(function(){
+			cleanErrors();
+		}, 5000);
 	}
 	var cleanErrors = function() {
 		alerts.html('');
 	}
-	
-	var dataLoadedEvent = function() {
-		$('#addButton').show();
-		windows.find('.window.graph').remove();
-	}
 		
-	var processData = function(data) {
+	var processData = function(window, data) {		
 		currentData = data;
-		cleanErrors();
 		var table = createTable(currentData);
-		/*if ($('#data').length == 0) {
-			var window = createWindow(table, 'data');
-			windows.append(window);
-		} else {
-			var window = $('#data');
-			window.html(table);
-		}*/
-		$('#source').putWindowData(table);
-		dataLoadedEvent();		
+		window.putWindowData(table);
+		ndx = crossfilter(currentData);
+		window.data('currentData', currentData);
+		window.data('ndx', ndx);
 		//---//
-		ndx = crossfilter(currentData);		
+		
 		
 		/*var gainOrLoss = ndx.dimension(function (d) {
 	        return d.date;
@@ -83,27 +61,30 @@
 	
 	var parseDate = d3.time.format("%m/%d/%Y").parse;
 	
-	var createNewGraph = function(type) {
+	var createNewGraph = function(dataWindow, type) {
 		$.ajax({
-			url : 'site/form',
+			url : 'graph/form',
 			data : {type : type},
-			success : function(data) {				
-				gWindowIds++;
-				var window = createWindow(data, 'graph'+gWindowIds, 'graph');
-				window.find('.new-graph button').click(function(){
-					processGraph($(this).closest('.content'));
-				});
+			success : function(data) {
+				var window = windowEvents(data);
+				window.data('parentId', dataWindow.attr('id'));
+				window = windowGraphEvents(window);
 				windows.append(window);
 			}
 		});
 	}
 	
 	var processGraph = function(window) {
+		var parentId = window.data('parentId');		
+		var parentWindow = $('#'+parentId);
+		var content = window.find('.content');
 		var params = new Array();
-		window.find('input, select').each(function(){			
+		content.find('input, select').each(function(){			
 			params[$(this).attr('name')] = $(this).attr('value');
 		});
-		window.closest('.window').putWindowData('');
+		window.putWindowData('');
+		var currentData = parentWindow.data('currentData');
+		var ndx = parentWindow.data('ndx');		
 		if (params['type'] == 'linear') {
 			var x = params['x'];
 			var y = params['y'];
@@ -126,7 +107,7 @@
 					return parseFloat(d[x]);
 				}
         		return parseInt(d[x])
-        	});
+        	});        	
         	var hits = dimension.group();
         	switch (aggregate) {
 				case 'sum' :
@@ -138,20 +119,22 @@
 				default :
 					hits = hits.reduceSum(function(d) {return d[y]});
 					break
-        	}      	
-        	
+        	}        	
 			var minX = dimension.bottom(1)[0][x];	        
 			var maxX = dimension.top(1)[0][x];
 			
 			var xDomain = d3.scale.linear().domain([minX, maxX]);
 			if (x_type == 'date') {
 				xDomain = d3.time.scale().domain([minX,maxX]);
-			}
-			
+			}			
 			var hitsArr = hits.all();
-        	var minY = hitsArr[0].value;        	
-        	var maxY = hitsArr[hitsArr.length-1].value;
-        	
+			var hitsCount = hits.size();
+			var hitsMax = hits.top(1);
+			var hitsMin = hits.top(hitsCount);
+        	var maxY = hitsMax[0].value;        	
+        	var minY = hitsMin[hitsCount-1].value;
+        	console.log(minY);
+        	console.log(maxY);
         	if (y_type == 'numeric') {
         		if (minY < 0) {
 					minY = minY * 1.05
@@ -164,37 +147,22 @@
 					maxY = maxY * 1.05;
 				}
         	}
-        	
+        	console.log(minY);
+        	console.log(maxY);
         	var yDomain = d3.scale.linear().domain([minY, maxY]);
 			if (y_type == 'date') {
 				yDomain = d3.time.scale().domain([minY,maxY]);
-			}        	
-			
-	        var hitslineChart  = dc.lineChart('#'+window.attr('id')); 
+			}			
+	        var hitslineChart  = dc.lineChart('#'+content.attr('id')); 
 	        hitslineChart
-			.width(500).height(200)
+			.width(290).height(290)
 			.dimension(dimension)
 			.group(hits)
 			.x(xDomain).y(yDomain).render();
+			window.data('graph', hitslineChart);
 		}
-	}
-	
-	var createWindow = function(content, id, classes) {
-		if (classes !== undefined) {
-			classes = 'window '+classes;
-		} else {
-			classes = 'window';
-		}
-		var window = $('<div class="'+classes+'"><div class="resize"><div class="content"></div></div><div class="source-data"></div></div>');
-		window.find('.resize').resizable({
-			minWidth: 300,
-			minHeight: 300
-		});
-		if (id !== undefined) {
-			window.find('.content').attr('id', id);
-		}
-		window.find('.content').html(content);
-		return window;
+		parentWindow.data('currentData', currentData);
+		parentWindow.data('ndx', ndx);
 	}
 	
 	var createTable = function(data) {
@@ -227,26 +195,123 @@
 		return body;
 	}
 	
-	var events = function() {
-		$('#addButton li').click(function(){
-			createNewGraph($(this).data('type'));
+	var windowEvents = function(data) {
+		var window = $(data);		
+		window.find('.resize').resizable({
+			minWidth: 300,
+			minHeight: 300
 		});
+		return window;
+	}
+	
+	var windowDataEvents = function(window) {
+		window.find('form').ajaxForm({
+			dataType: 'json',
+			success: function(data){				
+				if (data['error'] !== undefined) {
+					error(data['error']);					
+				} else {
+					processData(window, data);
+				}
+			}
+		});
+		return window;
+	}
+	
+	var windowGraphEvents = function(window) {
+		window.find('.new-graph button').click(function(){
+			processGraph($(this).closest('.window'));
+		});
+		window.on("resizestop", function(event, ui) {
+			var graph = $(this).data('graph');
+			if (graph !== undefined) {
+				var width = window.find('.content').width() - 10;
+				var height = window.find('.content').height() - 10;
+				graph.width(width).height(height).render();
+			}
+		});
+		return window;
+	}
+	
+	var events = function() {		
+		$('#addDataButton').click(function(){
+			//get data window
+			var url = $(this).data('url');
+			$.ajax({
+				url: url,
+				success: function(data) {
+					var window = windowEvents(data);
+					window = windowDataEvents(window);
+					windows.append(window);
+				}
+			});
+		});		
+	    $.contextMenu({
+	        selector: '.window .content .edit', 
+	        trigger: 'left',
+	        items: {
+	        	"add": {
+	        		name: "График",
+	        		icon: "add",
+	        		items: {
+						'linear' : {
+							name: "Линейный",
+							callback: function(key, options) {
+								var window = $(this).closest('.window');
+								createNewGraph(window, key);
+							}							
+						}
+	        		},
+	        		disabled: function(key, opt) {
+	        			var window = $(this).closest('.window');
+	        			if (window.data('parentId') !== undefined) {
+							return true;
+						}
+						return false;
+	        		}
+	        	},
+	            "edit": {
+	            	name: "Редактировать",
+	            	icon: "edit",
+	            	callback: function(key, options) {
+	            		var window = $(this).closest('.window');
+	            		window.editSourceData();
+					},
+					disabled: function(key, options) {
+						var window = $(this).closest('.window');
+						var parentId = window.data('parentId');						
+						if (parentId !== undefined) {
+							var parentWindow = $('#'+parentId);
+							if (parentWindow.length == 0) {
+								return true;
+							}
+						}
+						return false;
+					}
+	            },
+	            "sep1": "---------",
+	            "delete": {
+	            	name: "Удалить",
+	            	icon: "delete",
+	            	callback: function(key, options) {
+	            		var window = $(this).closest('.window');
+	            		window.remove();
+					}
+	            },
+	            /*"copy": {name: "Copy", icon: "copy"},
+	            "paste": {name: "Paste", icon: "paste"},	            
+	            "quit": {name: "Quit", icon: "quit"}*/
+	        }
+	    });		
 	}
 	
 	var getEdit = function() {
 		var edit = $('<a href="javascript:void(0);" class="edit">Редактировать</a>');
-		edit.click(function(){
-			$(this).closest('.window').editSourceData();
-		});
 		return edit;
 	}
 	
 	$(document).ready(function(){
 		init();
 		events();
-		$('.window .resize').resizable({
-			minWidth: 300,
-			minHeight: 300
-		});		
 	});
 })(jQuery);
