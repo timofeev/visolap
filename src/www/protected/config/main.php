@@ -61,11 +61,11 @@ return array(
 		),
 		
 		'db'=>array(
-			'connectionString'=>'mysql:host=localhost;dbname=visolap',
-			//'connectionString'=>'mysql:host=mysql.hostinger.ru;dbname=u968316744_volap',
+			//'connectionString'=>'mysql:host=localhost;dbname=visolap',
+			'connectionString'=>'mysql:host=mysql.hostinger.ru;dbname=u968316744_volap',
 			'emulatePrepare'=>true,
-			'username'=>'visolap',
-			//'username'=>'u968316744_volap',
+			//'username'=>'visolap',
+			'username'=>'u968316744_volap',
 			'password'=>'visolap',			
 			'charset'=>'utf8',
 		),
