@@ -13,33 +13,19 @@
     <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.contextMenu/jquery.ui.position.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.contextMenu/jquery.contextMenu.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/jquery.form.js'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.json.js'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.htmlize.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/d3.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/crossfilter.js'); ?>    
     <?php Yii::app()->clientScript->registerScriptFile('/js/dc.js'); ?>    
     <?php Yii::app()->clientScript->registerScriptFile('/js/core.js'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/layout.js'); ?>
 
 	<title>Visual OLAP</title>
 
 	<?php Yii::app()->bootstrap->register(); ?>
 </head>
 <body>
-	<?php $this->widget('bootstrap.widgets.TbNavbar',array(
-	    'items'=>array(
-	        array(
-	            'class'=>'bootstrap.widgets.TbMenu',
-	            'items'=>array(
-	                array('label'=>'Главная', 'url'=>'/'),
-	                array(
-	                	'label' => 'Добавить данные',
-	                	'url' => 'javascript:void(0);',
-	                	'itemOptions' => array('id' => 'addDataButton', 'data-url' => Yii::app()->createUrl('data/form'))	                	
-	                ),
-	            ),
-	        ),
-	    ),
-	)); ?>
-<div class="container" id="page">
 	<?php echo $content; ?>
-</div><!-- page -->
 </body>
 </html>

@@ -1,7 +1,7 @@
 <?php
 class GraphController extends WindowController {
 	public function actionForm($type) {
-		$this->renderWindow($type);
+		$this->renderWindow($type, array(), 'graph-window');
 	}
 }
 ?>

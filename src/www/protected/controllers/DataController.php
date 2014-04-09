@@ -1,7 +1,7 @@
 <?php
 class DataController extends WindowController {
 	public function actionForm() {		
-		$this->renderWindow('form');
+		$this->renderWindow('form', array(), 'data-window');
 	}
 	public function actionSubmit($source) {
 		$db = Yii::app()->db;

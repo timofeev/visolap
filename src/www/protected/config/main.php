@@ -17,7 +17,7 @@ return array(
 	// autoloading model and component classes
 	'import'=>array(
 		'application.models.*',
-		'application.components.*',
+		'application.components.*',		
 	),
 
 	'modules'=>array(
@@ -28,6 +28,11 @@ return array(
 			'password'=>'123',
 			// If removed, Gii defaults to localhost only. Edit carefully to taste.
 			'ipFilters'=>array('127.0.0.1','::1'),
+		),
+		'wiki' => array(
+			'userAdapter' => array(
+				'class' => 'WikiUser',
+			),
 		),
 	),
 
@@ -46,10 +51,12 @@ return array(
 			'urlFormat'=>'path',
 			'showScriptName' => false,
 			'rules'=>array(
-				'/'=>'site/index',
+				'/'=>'wiki/layout/index',
+				'page/<uid>' => 'wiki/layout/load',
+				'save/*' => 'wiki/layout/save',
 				'<controller:\w+>/<id:\d+>'=>'<controller>/view',
 				'<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
-				'<controller:\w+>/<action:\w+>/*'=>'<controller>/<action>',
+				'<controller:\w+>/<action:\w+>/*'=>'<controller>/<action>',				
 			),
 		),
 		
@@ -59,8 +66,7 @@ return array(
 			'emulatePrepare'=>true,
 			'username'=>'visolap',
 			//'username'=>'u968316744_volap',
-			'password'=>'visolap',
-			'persistent'=>true,
+			'password'=>'visolap',			
 			'charset'=>'utf8',
 		),
 		// uncomment the following to use a MySQL database
@@ -92,6 +98,9 @@ return array(
 				*/
 			),
 		),
+		'cache' => array(
+	       'class' => 'CFileCache',
+	    ),
 	),
 
 	// application-level parameters that can be accessed

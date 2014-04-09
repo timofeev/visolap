@@ -1,4 +1,4 @@
-<div class="new-graph">
+<form class="new-graph">
 	<input type="hidden" name="type" value="linear" />
 	<div class="form-group">
 		<label>Ось X</label>
@@ -25,5 +25,5 @@
 			<option value="count">Count</option>
 		</select>
 	</div>
-	<button class="btn btn-default">Нарисовать</button>
-</div>
+	<button class="btn btn-default" type="button">Нарисовать</button>
+</form>
