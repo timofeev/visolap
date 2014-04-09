@@ -20,6 +20,8 @@ var saveLayout = function(url, name) {
 		windowData['id'] = $(this).attr('id');
 		windowData['content'] = $(this).find('.source-data').htmlize({innerHTML: true});		
 		windowData['isData'] = $(this).hasClass('data-window') ? 1 : 0;
+		windowData['width'] = $(this).find('.resize').width();
+		windowData['height'] = $(this).find('.resize').height();
 		if ($(this).data('parent_id') !== undefined) {
 			windowData['parent_id'] = $(this).data('parent_id');
 		}
