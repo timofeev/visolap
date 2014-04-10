@@ -150,10 +150,12 @@ var processGraph = function(window) {
         var yDomain = d3.scale.linear().domain([minY, maxY]);
 		if (y_type == 'date') {
 			yDomain = d3.time.scale().domain([minY,maxY]);
-		}			
+		}
+		var width = window.find('.resize').width() - 10;
+		var height = window.find('.resize').height() - 10;
 	    var hitslineChart  = dc.lineChart('#'+content.attr('id')); 
 	    hitslineChart
-		.width(290).height(290)
+		.width(width).height(height)
 		.dimension(dimension)
 		.group(hits)
 		.x(xDomain).y(yDomain).render();
