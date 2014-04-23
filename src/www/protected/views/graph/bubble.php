@@ -1,5 +1,5 @@
 <form class="new-graph">
-	<input type="hidden" name="type" value="linear" />
+	<input type="hidden" name="type" value="bubble" />
 	<div class="form-group">
 		<label>Ось X</label>
 		<input type="text" class="form-control" name="x" />
@@ -12,6 +12,10 @@
 	<div class="form-group">
 		<label>Ось Y</label>
 		<input type="text" class="form-control" name="y" />		
+	</div>
+	<div class="form-group">
+		<label>Радиус</label>
+		<input type="text" class="form-control" name="r" />		
 	</div>
 	<div class="form-group">
 		<label>Агрегация</label>

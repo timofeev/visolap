@@ -15,10 +15,12 @@
     <?php Yii::app()->clientScript->registerScriptFile('/js/jquery.form.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.json.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.htmlize.js'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/lib/jquery.serialize-object.min.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/d3.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/crossfilter.js'); ?>    
     <?php Yii::app()->clientScript->registerScriptFile('/js/dc.js'); ?>    
     <?php Yii::app()->clientScript->registerScriptFile('/js/core.js'); ?>
+    <?php Yii::app()->clientScript->registerScriptFile('/js/graph.js'); ?>
     <?php Yii::app()->clientScript->registerScriptFile('/js/layout.js'); ?>
 
 	<title>Visual OLAP</title>

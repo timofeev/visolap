@@ -1,5 +1,5 @@
 <form class="new-graph">
-	<input type="hidden" name="type" value="linear" />
+	<input type="hidden" name="type" value="bar" />
 	<div class="form-group">
 		<label>Ось X</label>
 		<input type="text" class="form-control" name="x" />

@@ -59,112 +59,6 @@ $.fn.editSourceData = function() {
 	content.prepend(source.children());
 }
 
-var parseDate = d3.time.format("%m/%d/%Y").parse;
-
-var createNewGraph = function(dataWindow, type) {
-	$.ajax({
-		url : '/graph/form',
-		data : {type : type},
-		success : function(data) {
-			var window = createWindow(data);
-			window.windowEvents();
-			window.data('parent_id', dataWindow.attr('id'));
-			window.windowGraphEvents();
-			window.find('.content').prepend(getEdit());			
-			windows.append(window);
-		}
-	});
-}
-
-var processGraph = function(window) {
-	var parentId = window.data('parent_id');		
-	var parentWindow = $('#'+parentId);
-	var content = window.find('.content');
-	var params = new Array();
-	content.find('input, select').each(function(){			
-		params[$(this).attr('name')] = $(this).attr('value');
-	});
-	window.putWindowData('');
-	var currentData = parentWindow.data('currentData');
-	var ndx = parentWindow.data('ndx');		
-	if (params['type'] == 'linear') {
-		var x = params['x'];
-		var y = params['y'];
-		var x_type = params['x_type'];
-		var y_type = params['y_type'];
-		var aggregate = params['aggregation'];
-		
-		if (x_type == 'date') {
-			currentData.forEach(function(d) {
-				if (typeof d[x] != 'object') {
-					d[x] = parseDate(d[x]);
-				}
-			});
-		}
-		var dimension = ndx.dimension(function(d) {
-			if (x_type == 'date') {
-				return d[x];
-			}
-			if (x_type == 'numeric') {
-				return parseFloat(d[x]);
-			}
-        	return parseInt(d[x])
-        });        	
-        var hits = dimension.group();
-        switch (aggregate) {
-			case 'sum' :
-				hits = hits.reduceSum(function(d) {return d[y]});
-				break
-			case 'count' :
-				hits = hits.reduceCount();
-				break
-			default :
-				hits = hits.reduceSum(function(d) {return d[y]});
-				break
-        }        	
-		var minX = dimension.bottom(1)[0][x];	        
-		var maxX = dimension.top(1)[0][x];
-		
-		var xDomain = d3.scale.linear().domain([minX, maxX]);
-		if (x_type == 'date') {
-			xDomain = d3.time.scale().domain([minX,maxX]);
-		}			
-		var hitsArr = hits.all();
-		var hitsCount = hits.size();
-		var hitsMax = hits.top(1);
-		var hitsMin = hits.top(hitsCount);
-        var maxY = hitsMax[0].value;        	
-        var minY = hitsMin[hitsCount-1].value;
-        if (y_type == 'numeric') {
-        	if (minY < 0) {
-				minY = minY * 1.05
-        	} else {
-				minY = minY * 0.95;
-			}
-			if (maxY < 0) {
-				maxY = maxY * 0.95;
-			} else {
-				maxY = maxY * 1.05;
-			}
-        }        	
-        var yDomain = d3.scale.linear().domain([minY, maxY]);
-		if (y_type == 'date') {
-			yDomain = d3.time.scale().domain([minY,maxY]);
-		}
-		var width = window.find('.resize').width() - 10;
-		var height = window.find('.resize').height() - 10;
-	    var hitslineChart  = dc.lineChart('#'+content.attr('id')); 
-	    hitslineChart
-		.width(width).height(height)
-		.dimension(dimension)
-		.group(hits)
-		.x(xDomain).y(yDomain).render();
-		window.data('graph', hitslineChart);
-	}
-	parentWindow.data('currentData', currentData);
-	parentWindow.data('ndx', ndx);
-}
-
 var createTable = function(data) {
 	var table= $('<table class="table table-bordered"></table>');
 	var head = createTableHead(data[0]);
@@ -227,11 +121,16 @@ $.fn.windowGraphEvents = function() {
 		processGraph($(this).closest('.window'));
 	});
 	window.on("resizestop", function(event, ui) {
-		var graph = $(this).data('graph');
-		if (graph !== undefined) {
+		var graph = $(this).data('graph');		
+		if (graph !== undefined && ($(this).find('.content form').length == 0)) {
 			var width = window.find('.content').width() - 10;
-			var height = window.find('.content').height() - 10;
-			graph.width(width).height(height).render();			
+			var height = window.find('.content').height() - 10;		
+			graph.width(width).height(height);
+			if (graph.radius !== undefined) {
+				var radius = Math.min(width, height) / 2;
+				graph.radius(radius);				
+			}			
+			graph.render();			
 		}
 	});	
 }
@@ -265,7 +164,35 @@ var events = function() {
 							var window = $(this).closest('.window');
 							createNewGraph(window, key);
 						}							
-					}
+					},
+					'pie' : {
+						name: "Круговой",
+						callback: function(key, options) {
+							var window = $(this).closest('.window');
+							createNewGraph(window, key);
+						}						
+					},
+					'row' : {
+						name: "Линейчатый",
+						callback: function(key, options) {
+							var window = $(this).closest('.window');
+							createNewGraph(window, key);
+						}						
+					},
+					'bar' : {
+						name: "Столбиковый",
+						callback: function(key, options) {
+							var window = $(this).closest('.window');
+							createNewGraph(window, key);
+						}						
+					}/*,
+					'bubble' : {
+						name: "Пузырьковый",
+						callback: function(key, options) {
+							var window = $(this).closest('.window');
+							createNewGraph(window, key);
+						}						
+					}*/
 	        	},
 	        	disabled: function(key, opt) {
 	        		var window = $(this).closest('.window');
@@ -309,9 +236,6 @@ var events = function() {
 	            	window.remove();
 				}
 	        },
-	        /*"copy": {name: "Copy", icon: "copy"},
-	        "paste": {name: "Paste", icon: "paste"},	            
-	        "quit": {name: "Quit", icon: "quit"}*/
 	    }
 	});		
 }
