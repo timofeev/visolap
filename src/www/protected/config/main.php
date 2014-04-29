@@ -17,7 +17,12 @@ return array(
 	// autoloading model and component classes
 	'import'=>array(
 		'application.models.*',
-		'application.components.*',		
+		'application.components.*',
+		'application.modules.rights.*',
+		'application.modules.rights.components.*',
+		'application.modules.user.*',
+		'application.modules.install.models.*',
+		'application.modules.user.models.*'		
 	),
 
 	'modules'=>array(
@@ -34,6 +39,42 @@ return array(
 				'class' => 'WikiUser',
 			),
 		),
+		'user' => array(
+			'recordsPerPage' => 20,
+		),
+		'rights'=>array(
+			'superuserName'=>'developer', // Name of the role with super user privileges.
+			'authenticatedName'=>'user', // Name of the authenticated user role.
+			'userIdColumn'=>'id', // Name of the user id column in the database.
+			'userNameColumn'=>'username', // Name of the user name column in the database.
+			'enableBizRule'=>true, // Whether to enable authorization item business rules.
+			'enableBizRuleData'=>false, // Whether to enable data for business rules.
+			'displayDescription'=>true, // Whether to use item description instead of name.
+			'flashSuccessKey'=>'RightsSuccess', // Key to use for setting success flash messages.
+			'flashErrorKey'=>'RightsError', // Key to use for setting error flash messages.
+			'install'=>true, // Whether to install rights.
+			'baseUrl'=>'/rights', // Base URL for Rights. Change if module is nested.
+			'layout'=>'rights.views.layouts.main', // Layout to use for displaying Rights.
+			'appLayout'=>'webroot.themes.admin.views.layouts.main', // Application layout.
+			'cssFile'=>false, // Style sheet file to use for Rights.
+			'install'=>false, // Whether to enable installer.
+			'debug'=>true,
+		),
+       	'install' => array(
+       		'enable' => true,
+       		
+       		'defaultDeveloperName' => 'adminz',
+       		'defaultDeveloperEmail' => 'dev@example.com',
+       		'defaultDeveloperPassword' => 'adminz',
+       		
+       		'defaultAdminName' => 'admin',
+       		'defaultAdminEmail' => 'admin@example.com',
+       		'defaultAdminPassword' => 'admin',
+       		
+       		'defaultUserName' => 'user',
+       		'defaultUserEmail' => 'user@example.com',
+       		'defaultUserPassword' => 'user',
+       	),
 	),
 
 	// application components
@@ -44,6 +85,8 @@ return array(
 		'user'=>array(
 			// enable cookie-based authentication
 			'allowAutoLogin'=>true,
+			'loginUrl'=>'/auth',
+			'class'=>'RWebUser',
 		),
 		// uncomment the following to enable URLs in path-format
 		
@@ -51,21 +94,31 @@ return array(
 			'urlFormat'=>'path',
 			'showScriptName' => false,
 			'rules'=>array(
+				'auth'=>'user/user/login',
+				'user'=>'user/user/index',
+				'recovery'=>'user/recovery/recovery',
+				'logout'=>'user/user/logout',
+				'install/<action>' => 'install/default/<action>',
+				'user/<action:\w+>'=>'user/user/<action>',
+				'recovery/<action:\w+>'=>'user/recovery/<action>',
 				'/'=>'wiki/layout/index',
 				'page/<uid>' => 'wiki/layout/load',
 				'save/*' => 'wiki/layout/save',
 				'<controller:\w+>/<id:\d+>'=>'<controller>/view',
 				'<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
 				'<controller:\w+>/<action:\w+>/*'=>'<controller>/<action>',				
+				
+				// add support for modules
+				'<module:\w+>/<controller:\w+>/<action:\w+>'=>'<module>/<controller>/<action>',
 			),
 		),
 		
 		'db'=>array(
-			//'connectionString'=>'mysql:host=localhost;dbname=visolap',
-			'connectionString'=>'mysql:host=mysql.hostinger.ru;dbname=u968316744_volap',
+			'connectionString'=>'mysql:host=localhost;dbname=visolap',
+			//'connectionString'=>'mysql:host=mysql.hostinger.ru;dbname=u968316744_volap',
 			'emulatePrepare'=>true,
-			//'username'=>'visolap',
-			'username'=>'u968316744_volap',
+			'username'=>'visolap',
+			//'username'=>'u968316744_volap',
 			'password'=>'visolap',			
 			'charset'=>'utf8',
 		),
@@ -101,6 +154,30 @@ return array(
 		'cache' => array(
 	       'class' => 'CFileCache',
 	    ),
+	    'authManager'=>array(
+            //'class'=>'CDbAuthManager',
+            'class'=>'RDbAuthManager',
+            'connectionID'=>'db',
+            'defaultRoles'=>array('guest'),
+            'itemTable' => 'user_auth_item',
+        	'itemChildTable' => 'user_auth_item_child',
+        	'assignmentTable' => 'user_auth_assignment',
+        	'rightsTable' => 'user_auth_right',
+        ),
+		
+		'session'=>array(
+			'class' => 'CDbHttpSession',
+			'connectionID' => 'db',
+            'sessionTableName' => 'session',
+		),
+		'hasher'=>array (
+			'class'=>'ext.phpass.Phpass',
+			'hashPortable'=>false,
+			'hashCostLog2'=>12,
+		),
+		'swiftMailer' => array(
+		    'class' => 'ext.swiftMailer.SwiftMailer',
+		),
 	),
 
 	// application-level parameters that can be accessed
