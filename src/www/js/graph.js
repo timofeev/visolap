@@ -1,4 +1,5 @@
 var parseDate = d3.time.format("%m/%d/%Y").parse;
+var format = d3.time.format("%Y-%m-%d");
 
 var createNewGraph = function(dataWindow, type) {
 	$.ajax({
@@ -22,42 +23,49 @@ var processGraph = function(window) {
 	var params = content.find('form').serializeObject();	
 	window.putWindowData('');
 	var currentData = parentWindow.data('currentData');
-	var ndx = parentWindow.data('ndx');		
-	if (params['type'] == 'linear') {
-		var x = params['x'];
-		var x_type = params['x_type'];
-		var y = params['y'];
-		var y_aggregation = params['y_aggregation']
-		
-		if (x_type == 'date') {
-			currentData.forEach(function(d) {
-				if (typeof d[x] != 'object') {
-					d[x] = parseDate(d[x]);
-				}
-			});
-		}
-		var dimension = ndx.dimension(function(d) {
+	var ndx = parentWindow.data('ndx');
+	
+	var x = params['x'];
+	var x_type = params['x_type'];
+	var y = params['y'];
+	
+	currentData.forEach(function(d) {
+		if (x_type !== undefined) {
 			if (x_type == 'date') {
-				return d[x];
+				d.xxx = parseDate(d[x]);
+			} else {
+				if (x_type == 'numeric') {
+					d.xxx = parseFloat(d[x]);
+				} else {
+					d.xxx = d[x];
+				}
 			}
-			if (x_type == 'numeric') {
-				return parseFloat(d[x]);
-			}
-        	return d[x];
+		} else {
+			d.xxx = d[x];
+		}
+		if (y !== undefined) {
+			d.yyy = d[y];
+		}
+	});
+			
+	if (params['type'] == 'linear') {
+		var y_aggregation = params['y_aggregation']
+		var dimension = ndx.dimension(function(d) {
+        	return d.xxx;
         });
-        var minX = dimension.bottom(1)[0][x];	        
-		var maxX = dimension.top(1)[0][x];
+        var minX = dimension.bottom(1)[0].xxx;	        
+		var maxX = dimension.top(1)[0].xxx;
 		
 		var hits = dimension.group();
 	   	switch (y_aggregation) {
 			case 'sum' :
-				hits = hits.reduceSum(function(d) {return d[y]});
+				hits = hits.reduceSum(function(d) {return d.yyy});
 				break
 			case 'count' :
 				hits = hits.reduceCount();
 				break
 			default :
-				hits = hits.reduceSum(function(d) {return d[y]});
+				hits = hits.reduceSum(function(d) {return d.yyy});
 				break
 	    }		
 					
@@ -94,64 +102,59 @@ var processGraph = function(window) {
 		window.data('graph', hitslineChart);
 	}
 	if (params['type'] == 'pie') {
-		var x = params['x'];
 		var dimension = ndx.dimension(function (d) {
-	        return d[x];
+	        return d.xxx;
 	    });
 	    var group = dimension.group();
 	    var width = window.find('.resize').width() - 10;
 		var height = window.find('.resize').height() - 10;
 	    var pieChart = dc.pieChart('#'+content.attr('id'));
-        pieChart.width(width).height(height).dimension(dimension).group(group).render();
+        pieChart.width(width).height(height).dimension(dimension).group(group).
+        label(function(d){        	
+        	if (x_type == 'date') {
+        		return format(d.data.key);
+			} else {
+				return d.data.key;
+			}
+        }).render();
         window.data('graph', pieChart);
 	}
 	if (params['type'] == 'row') {
-		var x = params['x'];
 		var dimension = ndx.dimension(function (d) {
-	        return d[x];
+	        return d.xxx;
 	    });
 	    var group = dimension.group();
 	    var width = window.find('.resize').width() - 10;
 		var height = window.find('.resize').height() - 10;
 	    var rowChart = dc.rowChart('#'+content.attr('id'));
-        rowChart.width(width).height(height).dimension(dimension).group(group).render();
+        rowChart.width(width).height(height).dimension(dimension).group(group).
+        label(function(d){        	
+        	if (x_type == 'date') {
+        		return format(d.key);
+			} else {
+				return d.key;
+			}
+        }).render();
         window.data('graph', rowChart);
 	}
 	if (params['type'] == 'bar') {
-		var x = params['x'];
-		var x_type = params['x_type'];
-		var y = params['y'];
-		var y_aggregation = params['y_aggregation']
-		
-		if (x_type == 'date') {
-			currentData.forEach(function(d) {
-				if (typeof d[x] != 'object') {
-					d[x] = parseDate(d[x]);
-				}
-			});
-		}
+		var y_aggregation = params['y_aggregation'];
 		var dimension = ndx.dimension(function(d) {
-			if (x_type == 'date') {
-				return d[x];
-			}
-			if (x_type == 'numeric') {
-				return parseFloat(d[x]);
-			}
-        	return d[x];
+        	return d.xxx;
         });
-        var minX = dimension.bottom(1)[0][x];	        
-		var maxX = dimension.top(1)[0][x];
+        var minX = dimension.bottom(1)[0].xxx;	        
+		var maxX = dimension.top(1)[0].xxx;
 		
 		var group = dimension.group();
 	   	switch (y_aggregation) {
 			case 'sum' :
-				hits = group.reduceSum(function(d) {return d[y]});
+				hits = group.reduceSum(function(d) {return d.yyy});
 				break
 			case 'count' :
 				hits = group.reduceCount();
 				break
 			default :
-				hits = group.reduceSum(function(d) {return d[y]});
+				hits = group.reduceSum(function(d) {return d.yyy});
 				break
 	    }		
 					
