@@ -16,8 +16,9 @@
 	<div class="form-group">
 		<label>Агрегация</label>
 		<select name="y_aggregation">
+			<option value="average">Average</option>
 			<option value="sum">Sum</option>
-			<option value="count">Count</option>
+			<option value="count">Count</option>			
 		</select>
 	</div>
 	<button class="btn btn-default" type="button">Нарисовать</button>

@@ -44,7 +44,7 @@ var processGraph = function(window) {
 			d.xxx = d[x];
 		}
 		if (y !== undefined) {
-			d.yyy = d[y];
+			d.yyy = parseFloat(d[y]);
 		}
 	});
 			
@@ -57,25 +57,40 @@ var processGraph = function(window) {
 		var maxX = dimension.top(1)[0].xxx;
 		
 		var hits = dimension.group();
-	   	switch (y_aggregation) {
-			case 'sum' :
-				hits = hits.reduceSum(function(d) {return d.yyy});
-				break
-			case 'count' :
-				hits = hits.reduceCount();
-				break
-			default :
-				hits = hits.reduceSum(function(d) {return d.yyy});
-				break
-	    }		
+		hits = hits.reduce(function(p, v) {
+			++p.y_count;
+			p.y_sum += v.yyy;
+			p.y_average = p.y_sum / p.y_count;
+			return p;
+		}, function(p, v) {
+			--p.y_count;
+			p.y_sum -= v.yyy;
+			p.y_average = p.y_sum / p.y_count;
+			return p;
+		}, function() {
+			return {y_count : 0, y_sum : 0, y_average : 0};
+		});	
 					
 		var hitsArr = hits.all();
-		var hitsCount = hits.size();
-		var hitsMax = hits.top(1);
-		var hitsMin = hits.top(hitsCount);
-	    var maxY = hitsMax[0].value;
-	    var minY = hitsMin[hitsCount-1].value;
-	    
+		var maxY = -9007199254740992;
+		var minY = 9007199254740992;
+		
+		for(var i in hitsArr) {
+			switch (y_aggregation) {
+				case 'average' :				
+					maxY = Math.max(maxY, hitsArr[i].value.y_average);
+	    			minY = Math.min(minY, hitsArr[i].value.y_average);
+					break
+				case 'sum' :
+					maxY = Math.max(maxY, hitsArr[i].value.y_sum);
+	    			minY = Math.min(minY, hitsArr[i].value.y_sum);
+					break
+				default :
+					maxY = Math.max(maxY, hitsArr[i].value.y_count);
+	    			minY = Math.min(minY, hitsArr[i].value.y_count);
+					break
+			}
+		}
                 
         if (minY < 0) {
 			minY = minY * 1.05
@@ -97,7 +112,20 @@ var processGraph = function(window) {
 	    var hitslineChart  = dc.lineChart('#'+content.attr('id')); 
 	    hitslineChart
 		.width(width).height(height)
-		.dimension(dimension).group(hits);		
+		.dimension(dimension).group(hits).valueAccessor(function(p) {
+			switch (y_aggregation) {
+				case 'average' :
+					return p.value.y_average;
+					break
+				case 'sum' :
+					return p.value.y_sum;
+					break
+				default :
+					return p.value.y_count;
+					break
+		    }
+		});
+		hitslineChart.margins().left = 41;		
 		hitslineChart.x(xDomain).y(yDomain).renderHorizontalGridLines(true).render();
 		window.data('graph', hitslineChart);
 	}
@@ -146,25 +174,40 @@ var processGraph = function(window) {
 		var maxX = dimension.top(1)[0].xxx;
 		
 		var group = dimension.group();
-	   	switch (y_aggregation) {
-			case 'sum' :
-				hits = group.reduceSum(function(d) {return d.yyy});
-				break
-			case 'count' :
-				hits = group.reduceCount();
-				break
-			default :
-				hits = group.reduceSum(function(d) {return d.yyy});
-				break
-	    }		
-					
+		group = group.reduce(function(p, v) {
+			++p.y_count;
+			p.y_sum += v.yyy;
+			p.y_average = p.y_sum / p.y_count;
+			return p;
+		}, function(p, v) {
+			--p.y_count;
+			p.y_sum -= v.yyy;
+			p.y_average = p.y_sum / p.y_count;
+			return p;
+		}, function() {
+			return {y_count : 0, y_sum : 0, y_average : 0};
+		});
+		
 		var hitsArr = group.all();
-		var hitsCount = group.size();
-		var hitsMax = group.top(1);
-		var hitsMin = group.top(hitsCount);
-	    var maxY = hitsMax[0].value;
-	    var minY = hitsMin[hitsCount-1].value;
-	    
+		var maxY = -9007199254740992;
+		var minY = 9007199254740992;
+		
+		for(var i in hitsArr) {
+			switch (y_aggregation) {
+				case 'average' :				
+					maxY = Math.max(maxY, hitsArr[i].value.y_average);
+	    			minY = Math.min(minY, hitsArr[i].value.y_average);
+					break
+				case 'sum' :
+					maxY = Math.max(maxY, hitsArr[i].value.y_sum);
+	    			minY = Math.min(minY, hitsArr[i].value.y_sum);
+					break
+				default :
+					maxY = Math.max(maxY, hitsArr[i].value.y_count);
+	    			minY = Math.min(minY, hitsArr[i].value.y_count);
+					break
+			}
+		}    
                 
         if (minY < 0) {
 			minY = minY * 1.05
@@ -186,7 +229,20 @@ var processGraph = function(window) {
 	    var barChart  = dc.barChart('#'+content.attr('id')); 
 	    barChart
 		.width(width).height(height)
-		.dimension(dimension).group(group);		
+		.dimension(dimension).group(group).valueAccessor(function(p) {
+			switch (y_aggregation) {
+				case 'average' :
+					return p.value.y_average;
+					break
+				case 'sum' :
+					return p.value.y_sum;
+					break
+				default :
+					return p.value.y_count;
+					break
+		    }
+		});
+		barChart.margins().left = 41;		
 		barChart.x(xDomain).y(yDomain).renderHorizontalGridLines(true).render();
 		window.data('graph', barChart);
 	}
