@@ -60,12 +60,12 @@ var processGraph = function(window) {
 		hits = hits.reduce(function(p, v) {
 			++p.y_count;
 			p.y_sum += v.yyy;
-			p.y_average = p.y_sum / p.y_count;
+			p.y_average = p.y_count ? p.y_sum / p.y_count : 0;
 			return p;
 		}, function(p, v) {
 			--p.y_count;
 			p.y_sum -= v.yyy;
-			p.y_average = p.y_sum / p.y_count;
+			p.y_average = p.y_count ? p.y_sum / p.y_count : 0;
 			return p;
 		}, function() {
 			return {y_count : 0, y_sum : 0, y_average : 0};
@@ -91,6 +91,8 @@ var processGraph = function(window) {
 					break
 			}
 		}
+		
+		console.log(minY, minX);
                 
         if (minY < 0) {
 			minY = minY * 1.05
@@ -177,12 +179,12 @@ var processGraph = function(window) {
 		group = group.reduce(function(p, v) {
 			++p.y_count;
 			p.y_sum += v.yyy;
-			p.y_average = p.y_sum / p.y_count;
+			p.y_average = p.y_count ? p.y_sum / p.y_count : 0;
 			return p;
 		}, function(p, v) {
 			--p.y_count;
 			p.y_sum -= v.yyy;
-			p.y_average = p.y_sum / p.y_count;
+			p.y_average = p.y_count ? p.y_sum / p.y_count : 0;
 			return p;
 		}, function() {
 			return {y_count : 0, y_sum : 0, y_average : 0};
